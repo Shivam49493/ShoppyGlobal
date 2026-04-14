@@ -37,6 +37,7 @@ export default function ProductDetail() {
       } catch (err) {
         if (err.name !== 'AbortError') {
           setError(err.message || 'Failed to load product')
+          setProduct(null) // Ensure product is null on error
         }
       } finally {
         setLoading(false)
@@ -48,6 +49,7 @@ export default function ProductDetail() {
   }, [id]) // re-fetch when route id changes
 
   const handleAddToCart = () => {
+    if (!product) return // Guard clause
     dispatch(addToCart({
       id: product.id,
       title: product.title,
@@ -61,16 +63,19 @@ export default function ProductDetail() {
   if (loading) return <LoadingSpinner />
 
   // Error handling UI
-  if (error) return (
+  if (error || !product) return (
     <div className="max-w-2xl mx-auto px-4 py-20 text-center">
       <div className="text-5xl mb-4">⚠️</div>
       <h2 className="font-display text-2xl font-bold text-bark mb-2">Oops!</h2>
-      <p className="font-body text-charcoal/50">{error}</p>
+      <p className="font-body text-charcoal/50">{error || 'Product not found'}</p>
       <Link to="/" className="mt-6 inline-block bg-ember text-white px-6 py-2 rounded-xl font-medium hover:bg-bark transition-colors">
         Back to Shop
       </Link>
     </div>
   )
+
+  // Add null check here - if product is null, don't render the main content
+  if (!product) return null
 
   const images = product.images?.length ? product.images : [product.thumbnail]
 
